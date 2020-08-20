@@ -1,0 +1,17 @@
+.navbar-heading {
+    margin: 0 auto;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+#searchbox-label {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+#uvi {
+    background-color: red;
+    border-radius: 3px;
+    color: white;
+    padding: 3px;
+}
