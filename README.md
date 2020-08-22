@@ -29,4 +29,4 @@ THEN I am presented with the last searched city forecast
 
 The following image demonstrates the application functionality:
 
-![weather dashboard demo](./Assets/weather-dashboard-screenshot.jpg)
+![weather dashboard demo](./Assets/weather-dashboard-screenshot.JPG)
