@@ -2,6 +2,26 @@ $(document).ready(function () {
     var api_key = "87d25a44ab87e457149219fa0268ade3"
     var localStorageKey = "search_history";
 
+    function setUvi(uvi) {
+        $("#uvi").text(uvi);
+        if (uvi < 3) {
+            $("#uvi").css("background-color", "green");
+        } else if (3 <= uvi && uvi < 6) {
+            $("#uvi").css({
+                "background-color": "yellow",
+                "color": "black"
+            });
+        } else if (6 <= uvi && uvi < 8) {
+            $("#uvi").css("background-color", "orange");
+        } else if (8 <= uvi && uvi < 11) {
+            $("#uvi").css("background-color", "red");
+        } else if (uvi >= 11) {
+            $("#uvi").css("background-color", "violet");
+        } else {
+            $("#uvi").css("background-color", "white");
+        }
+    }
+
     function getData(city_name) {
         $.ajax({
             type: "POST",
@@ -10,10 +30,11 @@ $(document).ready(function () {
             success: function (result) {
                 console.log(result);
                 var city = result.name;
-                var current_date = moment.unix(result.dt).format("l");
+                var offset = result.timezone;
+                var current_date = moment.unix(result.dt + offset).format("l");
                 var current_temp = result.name;
                 $("#cityName").text(`${city} (${current_date})`);
-
+                $("#weather-icon-header").attr("src", `http://openweathermap.org/img/wn/${result.weather[0].icon}.png`)
                 getForecast(result.coord.lat, result.coord.lon);
             }
         });
@@ -29,11 +50,25 @@ $(document).ready(function () {
                 $("#temp").text(result.current.temp);
                 $("#humidity").text(result.current.humidity);
                 $("#windSpeed").text(result.current.wind_speed);
-                $("#uvi").text(result.current.uvi)
+                setUvi(result.current.uvi);
+                showForecast(result);
             }
         });
     }
 
+    function showForecast(data) {
+        $(".forecast").each(function (idx, elem) {
+            var offset = data.timezone_offset;
+            var actual_time = data.daily[idx + 1].dt + offset;
+
+            // $(this).children(".date").text(moment().add(idx + 1, "days").format("l"));
+            $(this).children(".date").text(moment.unix(actual_time).format("l"));
+            $(this).children(".icon").attr("src", `http://openweathermap.org/img/wn/${data.daily[idx].weather[0].icon}@2x.png`)
+            console.log($(this).children(".temp-parent").children(".temp"));
+            $(this).children(".temp-parent").children(".temp").text(data.daily[idx + 1].temp.day);
+            $(this).children(".humidity-parent").children(".humidity").text(data.daily[idx + 1].humidity);
+        });
+    }
 
     function setLocalStorage(key, value) {
         var temp = getLocalStorage(key);
@@ -59,10 +94,16 @@ $(document).ready(function () {
     function getOldData() {
         var searchHistory = getLocalStorage(localStorageKey);
 
-        for (var i = 0; i < searchHistory.length; i++) {
-            var elem = $("<li>").attr("class", "list-group-item").text(searchHistory[i]);
-            $("#search-history").prepend(elem);
+        if (searchHistory !== null) {
+            getData(searchHistory[searchHistory.length - 1]);
+
+            for (var i = 0; i < searchHistory.length; i++) {
+                var elem = $("<li>").attr("class", "list-group-item").text(searchHistory[i]);
+                $("#search-history").prepend(elem);
+            }
         }
+
+
     }
 
     getOldData();
@@ -71,8 +112,17 @@ $(document).ready(function () {
         var query = $(this).siblings("#searchbox").val();
         var elem = $("<li>").attr("class", "list-group-item").text(query);
         $("#search-history").prepend(elem);
-        setLocalStorage(localStorageKey, query)
+        setLocalStorage(localStorageKey, query);
         getData(query);
     });
+
+    $(".list-group-item").click(function (e) {
+        var query = $(this).text();
+        var elem = $("<li>").attr("class", "list-group-item").text(query);
+        $("#search-history").prepend(elem);
+        setLocalStorage(localStorageKey, query);
+        getData(query);
+    });
+
 
 });

@@ -10,8 +10,17 @@
 }
 
 #uvi {
-    background-color: red;
     border-radius: 3px;
     color: white;
     padding: 3px;
+}
+
+.list-group-item {
+    cursor: pointer;
+}
+
+.forecast {
+    color: white;
+    background-color: #007BFF;
+    border-radius: 2px;
 }
